@@ -1,0 +1,53 @@
+<style>
+    .navbar {
+        column-gap: 80px;
+        row-gap: 20px;
+        font-size: 25px;
+        margin-bottom: 30px;
+    }
+
+    .navbar .nav-link {
+        text-decoration: none;
+        color: var(--blue);
+        font-size: 20px;
+        padding: 5px;
+    }
+
+    .navbar .nav-link:hover {
+        color: var(--yellow);
+    }
+
+    .logo {
+        color: var(--green);
+        font-size: 30px;
+        font-family: "JetBrains Mono", monospace;
+        text-align: center;
+        padding: 20px 10px 10px;
+    }
+
+
+</style>
+
+<div class="logo"> CHRONICLER </div>
+<div class="container row navbar centered">
+
+    <a id="Nav-Home" href="/" class="nav-link">
+        Home
+    </a>
+
+    <a id="Nav-About" href="/about" class="nav-link">
+        About
+    </a>
+
+</div>
+
+<script>
+    let map = {
+        "": "Nav-Home",
+        "about": "Nav-About"
+    };
+    let frag = window.location.href.split("/")[3];
+    if (frag != null) {
+        $(`#${map[frag]}`).css({"color": "var(--base)", "background-color": "var(--blue)"}); 
+    };
+</script>

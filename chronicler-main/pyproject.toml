@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "chronicler"
+version = "0.1.0"
+description = ""
+authors = ["Aman Phatak <phatakaman@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+aiohttp = "^3.9.3"
+pydantic = "^2.6.4"
+litestar = {extras = ["standard", "sqlalchemy"], version = "^2.7.1"}
+tabulate = "^0.9.0"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.29"}
+asyncpg = "^0.29.0"
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tools.pyright]
+type-checking-mode = "strict"

@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+
+{% block head %}
+    <meta property="og:description" content="a better way to view your SICSR timetable." />
+    <meta property="og:title" content="chronicler" />
+    <meta property="og:site_name" content="chronicler">
+	<meta name="theme-color" content="#A6E3A1">
+	<title>chronicler</title>
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+    input {
+        background-color: var(--surface1);
+        border: none;
+    }
+    button {
+        background-color: var(--mantle);
+        border: none;
+    }
+    button:hover {
+        background-color: var(--pink);
+        color: var(--base);
+    }
+    textarea {
+        background-color: var(--surface0);
+        border: 1px solid var(--surface1);
+    }
+
+    .form-items {
+        gap: 10px;
+        margin-top: 40px;
+        margin-bottom: 50px;
+    }
+
+    .form-filters {
+        gap: 5px;
+    }
+
+    .form-dates {
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .form-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center; 
+        max-width: 1000px;
+    }
+
+    .rule_name {
+        background-color: var(--surface1);
+        border: none;
+    }
+
+    #result {
+        padding-bottom: 100px;
+    }
+
+    .rule {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        padding: 10px;
+        border: 1px solid var(--surface1);
+        border-radius: 10px;
+        justify-content: space-between;
+    }
+
+    .error {
+        color: var(--red);
+        text-align: center;
+    }
+
+    .delete_rule:hover, .delete_filter:hover {
+        background-color: var(--red) !important;
+    }
+
+
+    #submit:hover {
+        background-color: var(--green);
+    }
+
+    .result_items {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+        padding: 30px 0;
+    }
+
+    .result_items * {
+        text-align: left;
+    }
+
+    .result_date {
+        color: var(--peach);
+        margin: 5px 0;
+    }
+
+    #result .result_table {
+        border: 1px solid var(--surface0);
+        padding: 15px 0;
+        gap: 40px;
+        border-collapse: collapse;
+    }
+
+    #result .result_table th, td {
+        border: 1px solid var(--surface1);
+    }
+
+    #result > .result_items > .result_table > .result_table_head th {
+        padding: 8px;
+    }
+
+    #result > .result_items > .result_table > .result_table_body td {
+        padding: 8px;
+    }
+
+    .result_table_head > tr > th {
+        color: var(--yellow);
+    }
+
+    #add_rule, .add_filter, #submit, .delete_rule {
+        height: 35px;
+    }
+
+    .timetaken {
+        color: var(--subtext0);
+    }
+
+    #delete_filter {
+        height: 50px;
+    }
+
+    .date-block {
+        background-color: var(--mauve);
+        color: var(--base);
+        padding: 1px 5px;
+    }
+
+    .type-block {
+        background-color: var(--lavender);
+        color: var(--base);
+        padding: 1px 5px;
+        font-size: 11pt;
+    }
+
+
+    #today, #this_week {
+        height: 100%;
+    }
+
+
+    .filter-row {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+    }
+
+    .filter {
+        flex: 1;
+        font-size: 11pt;
+    } 
+
+    .rule-controls {
+        gap: 5px;
+    }
+
+    .type-row {
+        flex-wrap: nowrap;
+    }
+
+    .rule_name {
+        font-size: 11pt;
+    }
+
+</style>
+
+    <p style='text-align: center; margin: 0; padding: 0;'> Welcome! <br> Configure your filters to get started: </p>
+
+    <div class="container column form-items">
+        <div class="container row form-dates">
+            <div>
+                <span class="date-block">Start</span><input id="start" name="start" type="date" value="{{ preload['start'] }}"/>
+            </div>
+            <div>
+                <span class="date-block">End</span><input id="end" name="end" type="date" value="{{ preload['end'] }}" />
+            </div>
+            <div>
+                <button type="button" id="today">Today</button> 
+            </div>
+            <div>
+                <button type="button" id="this_week">This Week</button> 
+            </div>
+        </div>
+        <div class="form-grid">
+            {% for type in preload["types"] %}
+                <div class="rule">
+                    <div class="type-row container row">
+                        <span class="type-block">Type</span><select class="rule_name">
+                            {% for stype in types %}
+                                {% if type == stype %}
+                                    {% set selected="selected" %}
+                                {% else %}
+                                    {% set selected="" %}
+                                {% endif %}
+                                <option value="{{ stype }}" {{ selected }} > {{ stype }} </option>
+                            {% endfor %}
+                        </select> 
+                    </div> <br>
+                    <div class="form-filters container column">
+                        {% for filter in preload["types"][type] %}
+                        <div class="filter-row"><input type='text' class='filter' value="{{ filter }}"/><button type='button' class='delete_filter'>X</button></div>
+                        {% endfor %}
+                    </div>
+                    <div class="rule-controls container column">
+                        <button type="button" class="add_filter"> Add Filter </button>
+                        <button type="button" class="delete_rule"> Delete Rule </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button id="add_rule" type="button"> Add Rule </button>
+        <button id="submit" type="button"> Submit </button>
+    </div>
+
+<div id="result">
+</div>
+
+<script>
+    $( document ).ready( () => {
+        var count = $(".form-grid").length - 2;
+        $(document).on("click", ".add_filter", (e) => {
+            let parent = $(e.target).parent().parent().find(".form-filters").append("<div class='filter-row'><input type='text' class='filter'/><button class='delete_filter' type='button'>X</button></div>");
+        });
+
+        $(document).on("click", "#add_rule", () => {
+            let rule = `
+                <div class="rule">
+                    <div class="type-row container row">
+                        <span class="type-block">Type</span><select class="rule_name">
+                            {% for stype in types %}
+                                {% if type == stype %}
+                                    {% set selected="selected" %}
+                                {% else %}
+                                    {% set selected="" %}
+                                {% endif %}
+                                <option value="{{ stype }}" {{ selected }} > {{ stype }} </option>
+                            {% endfor %}
+                        </select> 
+                    </div> <br>
+                    <div class="form-filters container column">
+                        {% for filter in preload["types"][type] %}
+                        <div class="filter-row"><input type='text' class='filter' value="{{ filter }}"/><button type='button' class='delete_filter'>X</button></div>
+                        {% endfor %}
+                    </div>
+                    <div class="rule-controls container column">
+                        <button type="button" class="add_filter"> Add Filter </button>
+                        <button type="button" class="delete_rule"> Delete Rule </button>
+                    </div>
+                </div>
+            `;
+            $(".form-grid").append(rule); 
+        });
+
+        $(document).on("click", ".delete_rule", (e) => {
+            $(e.target).parent().parent().remove();
+        });
+
+        $(document).on("click", ".delete_filter", (e) => {
+            $(e.target).parent().remove();
+        });
+
+        $("#today").on("click", (e) => {
+            let today = new Date();
+            let repr = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+            $("#start").val(repr);
+            $("#end").val(repr);
+        });
+        
+        $("#this_week").on("click", (e) => {
+            let today = new Date();
+            let repr = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+            let nextweek = new Date();
+            nextweek.setDate(nextweek.getDate() + 7);
+            let nwrepr = nextweek.getFullYear() + '-' + ('0' + (nextweek.getMonth() + 1)).slice(-2) + '-' + ('0' + nextweek.getDate()).slice(-2);
+            $("#start").val(repr);
+            $("#end").val(nwrepr);
+        });
+
+        $(document).on("click", "#submit", () => {
+            $("#result").children().remove();
+            let payload = {};
+            payload["start"] = $("#start").val();
+            payload["end"] = $("#end").val();
+            payload["types"] = {};
+            $(".rule").each( (i, rule) => {
+                let items = [];
+                $(rule).find(".filter").each( (j, filter) => {
+                    items.push($(filter).val());
+                });
+                let rule_name = $(rule).find(".rule_name").first().val();
+                let target = payload["types"][rule_name];
+                if (target != null) {
+                    payload["types"][rule_name] = target.concat(items); // aggregate duplicate types in the same bucket
+                } else {
+                    payload["types"][rule_name] = items;
+                }
+            });
+            $.ajax({"data": JSON.stringify(payload), "method": "POST", "contentType": "application/json"}).done((data) => {
+                let result = $("#result");
+                result.append(`<div class='timetaken'>Completed in ${data['time']}s</div>`)
+                for (const [date, entries] of Object.entries(data["entries"])) {
+                    result.append(`<div class='result_items'><div class="result_date">${date}</div></div>`) 
+                    if (entries.length == 0) {
+                        result.find(".result_date").last().append("<span class='error'> No entries found! </span>")
+                        continue;
+                    }
+                    let div = result.find(".result_items").last();
+                    div.append("<table class='result_table'></table>")
+                    let table = div.find(".result_table").last();
+                    table.append("<thead class='result_table_head'></thead>");
+                    let thead = table.find("thead").last();
+                    thead.append("<tr></tr>")
+                    let theaders = thead.find("tr");
+                    for (const header of data["fields"]) {
+                        theaders.append(`<th>${header}</th>`)
+                    }
+                    table.append("<tbody class='result_table_body'></tbody>");
+                    let tbody = table.find("tbody").last();
+                    for (const entry of entries) {
+                        tbody.append("<tr></tr>");
+                        let row = tbody.find("tr").last();
+                        for (const header of data["fields"]) {
+                            row.append(`<td>${entry[header]}</td>`) 
+                        }
+                    }
+                }
+            });
+        });
+    });
+
+
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,23 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width">
+        <meta property="og:title" content="chronicler" />
+		<meta property="og:type" content="website" />
+		{% block head %}
+		{% endblock %}
+		<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+        <link rel="stylesheet" href="./static/style.css" />
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap');
+        </style>
+    </head>
+    <body>
+        {% include "nav.html" %}
+        <div class="container column centered content">
+            {% block content %}
+            {% endblock %}
+        </div>
+        {% include 'footer.html' %}
+    </body>
+</html>

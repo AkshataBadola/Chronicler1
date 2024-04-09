@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.about-content {
+    text-align: left;
+    margin-bottom: 50px;
+    padding: 30px;
+}
+hr {
+    color: var(--surface1);
+}
+</style>
+<div class="about-content">
+<p>
+    Tired of spending hours finding your daily schedule on the official SICSR timetable site? <br><br>
+    CHRONICLER is here to help.<br><br>
+    Built with simplicity and minimalism in mind, CHRONICLER helps you set and store filters for your subjects and electives, so you can get your daily or weekly timetable without any hassle. <br>
+    <hr>
+    <h2> How it works </h2>
+    The CHRONICLER system consists of 3 components.
+    <ol>
+        <li> A Cloudflare worker written in Rust that scrapes, validates and cleans the timetable data from the official timetable website </li>
+        <li> A Python ASGI application, powered by the Litestar framework. </li>
+        <li> A PostgreSQL instance that stores user data and helps with caching. </li>
+    </ol>
+
+    Configuration is completely in <a href="https://toml.io/en/">TOML</a>, and utilizes <a href="https://en.wikipedia.org/wiki/Regular_expression">Regular Expressions</a> to provide the greatest flexibility.
+</p>
+</div>
+
+
+{% endblock %}
